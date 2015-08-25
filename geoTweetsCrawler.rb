@@ -1,6 +1,8 @@
 require 'tweetstream'
 require 'json'
 require 'mongo'
+require 'time'
+
 include Mongo
 
 TweetStream.configure do |config|
@@ -22,7 +24,7 @@ while true do
 begin
 
   mongo_client = MongoClient.new("localhost", 27017)
-  coll = mongo_client['idea']['geo_tweets']
+  coll = mongo_client['idea']['geo_tweets_2']
 
   dataList = []
   TweetStream::Client.new.locations(-180,-90,180,90) do |status|
@@ -32,10 +34,11 @@ begin
     data = status.to_h
     data.select!{|key,value| keyFilter.include? key.to_s}
     data[:user].select!{|key,value| userFilter.include? key.to_s}
+    data[:created_at] = Time.parse data[:created_at]
   #puts JSON.pretty_generate(data)
     dataList.push(data)
     #puts data
-    if dataList.length > 1000
+    if dataList.length > 10000#10000
   	 bulk = coll.initialize_ordered_bulk_op
 
   	 dataList.each do |data|
