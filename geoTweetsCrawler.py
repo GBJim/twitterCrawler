@@ -17,14 +17,14 @@ class TweetStreammer(TwythonStreamer):
 	def __init__(self, consumer_key, consumer_secret, oauth_token, oauth_token_secret):
 		super(TweetStreammer, self).__init__(consumer_key, consumer_secret, oauth_token, oauth_token_secret)
 		self.tweets_buffer = []
-		self.bulk_size = 100
+		self.bulk_size = 1000
 		self.collection = MongoClient("localhost", 27017)["test"]["geo_tweets_3"]
 
 	def on_success(self, data):
 
 		if "user" not in data:  #Skip the non-tweet request result
 			return
-
+		#print(data)
 		tweet = self.tweet_filter(data)
 
 		self.tweets_buffer.append(tweet)
@@ -51,5 +51,8 @@ oauth_token_secret = 'fa5vK3szB3Tax3zdD4Hm7htXKtDnhsPVcK1PFIrOVq9Aq'
 
 
 geo_stream = TweetStreammer(consumer_key, consumer_secret, oauth_token, oauth_token_secret)
-
-geo_stream.statuses.filter(locations = [-180,-90,180,90])
+while True:
+	try:
+		geo_stream.statuses.filter(locations = [-180,-90,180,90])
+	except:
+		pass
